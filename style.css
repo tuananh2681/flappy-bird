@@ -1,0 +1,383 @@
+:root {
+    --bg-color: #030303;
+    --neon-cyan: #00f3ff;
+    --neon-cyan-glow: 0 0 10px rgba(0, 243, 255, 0.5), 0 0 20px rgba(0, 243, 255, 0.3);
+    --neon-red: #ff003c;
+    --neon-red-glow: 0 0 10px rgba(255, 0, 60, 0.5), 0 0 20px rgba(255, 0, 60, 0.3);
+    --font-terminal: 'Share Tech Mono', monospace;
+    --font-header: 'Orbitron', sans-serif;
+    --font-emotional: 'Rajdhani', sans-serif;
+    --font-body: 'Poppins', sans-serif;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body, html {
+    width: 100%;
+    height: 100%;
+    background-color: var(--bg-color);
+    color: #fff;
+    overflow: hidden;
+    font-family: var(--font-body);
+}
+
+/* CRT Effects */
+.scanlines {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: linear-gradient(
+        to bottom,
+        rgba(255,255,255,0),
+        rgba(255,255,255,0) 50%,
+        rgba(0,0,0,0.2) 50%,
+        rgba(0,0,0,0.2)
+    );
+    background-size: 100% 4px;
+    z-index: 999;
+    pointer-events: none;
+    opacity: 0.4;
+}
+
+.vignette {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: radial-gradient(circle at center, transparent 40%, rgba(0,0,0,0.8) 100%);
+    z-index: 998;
+    pointer-events: none;
+}
+
+#particle-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 1;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 3s ease;
+}
+
+/* Layout */
+.fullscreen-container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    z-index: 10;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.scene {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 2s ease, visibility 2s ease;
+}
+
+.scene.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Typography & Typewriter */
+.blinking-cursor {
+    display: inline-block;
+    width: 10px;
+    height: 1em;
+    background-color: var(--neon-cyan);
+    animation: blink 1s step-end infinite;
+    vertical-align: middle;
+    margin-left: 2px;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+/* Scene 1: Boot */
+.terminal-box {
+    width: 80%;
+    max-width: 800px;
+    height: 200px;
+    font-family: var(--font-terminal);
+    font-size: 1.2rem;
+    color: var(--neon-cyan);
+    text-shadow: var(--neon-cyan-glow);
+    text-align: left;
+    margin-bottom: 50px;
+}
+
+.terminal-line {
+    margin-bottom: 10px;
+    opacity: 0.8;
+}
+
+.action-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.progress-ring-container {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.progress-ring {
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform: rotate(-90deg);
+}
+
+.progress-ring__circle {
+    transition: stroke-dashoffset 0.1s linear;
+    stroke-dasharray: 326.726; /* 2 * pi * r (52) */
+    stroke-dashoffset: 326.726;
+    stroke: var(--neon-cyan);
+    filter: drop-shadow(0 0 5px var(--neon-cyan));
+}
+
+.cyber-button {
+    background: transparent;
+    border: 1px solid var(--neon-cyan);
+    color: var(--neon-cyan);
+    font-family: var(--font-header);
+    font-size: 0.9rem;
+    padding: 15px 20px;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    box-shadow: inset 0 0 10px rgba(0, 243, 255, 0.1), 0 0 10px rgba(0, 243, 255, 0.2);
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 2;
+    overflow: hidden;
+}
+
+.cyber-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(0, 243, 255, 0.4), transparent);
+    transition: left 0.5s ease;
+}
+
+.cyber-button:hover::before {
+    left: 100%;
+}
+
+.cyber-button:hover {
+    box-shadow: inset 0 0 20px rgba(0, 243, 255, 0.3), 0 0 20px rgba(0, 243, 255, 0.6);
+    background: rgba(0, 243, 255, 0.05);
+}
+
+.cyber-button:active {
+    transform: scale(0.95);
+}
+
+.hold-hint {
+    margin-top: 15px;
+    font-family: var(--font-terminal);
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.5);
+    letter-spacing: 2px;
+    animation: pulse 2s infinite;
+}
+
+/* Scene 2: Archive */
+.message-container {
+    width: 80%;
+    max-width: 800px;
+    min-height: 200px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.emotional-text {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    font-family: var(--font-emotional);
+    font-size: 2rem;
+    font-weight: 300;
+    line-height: 1.6;
+    letter-spacing: 1px;
+    color: #e0e0e0;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+    transition: text-shadow 0.5s ease, color 0.5s ease, opacity 1s ease;
+}
+
+.emotional-text:hover {
+    color: #fff;
+    text-shadow: 0 0 15px rgba(255, 255, 255, 0.6);
+}
+
+.heartbeat {
+    animation: heartbeat 1.5s ease-in-out infinite;
+}
+
+@keyframes heartbeat {
+    0% { transform: scale(1); text-shadow: 0 0 10px rgba(255, 255, 255, 0.2); }
+    20% { transform: scale(1.02); text-shadow: 0 0 20px rgba(0, 243, 255, 0.4); }
+    40% { transform: scale(1); text-shadow: 0 0 10px rgba(255, 255, 255, 0.2); }
+    100% { transform: scale(1); }
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+}
+
+/* Scene 3: Error */
+.error-container {
+    font-family: var(--font-terminal);
+    font-size: 3rem;
+    color: var(--neon-red);
+    text-shadow: var(--neon-red-glow);
+    text-align: center;
+    text-transform: uppercase;
+    font-weight: bold;
+}
+
+.glitch-effect {
+    position: relative;
+}
+
+.glitch-effect::before,
+.glitch-effect::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--bg-color);
+}
+
+.glitch-effect::before {
+    left: 4px;
+    text-shadow: -2px 0 var(--neon-cyan);
+    clip-path: polygon(0 0, 100% 0, 100% 33%, 0 33%);
+    animation: glitch-anim 2s infinite linear alternate-reverse;
+}
+
+.glitch-effect::after {
+    left: -4px;
+    text-shadow: -2px 0 var(--neon-red);
+    clip-path: polygon(0 66%, 100% 66%, 100% 100%, 0 100%);
+    animation: glitch-anim-2 3s infinite linear alternate-reverse;
+}
+
+@keyframes glitch-anim {
+    0% { clip-path: polygon(0 2%, 100% 2%, 100% 5%, 0 5%); }
+    20% { clip-path: polygon(0 15%, 100% 15%, 100% 15%, 0 15%); }
+    40% { clip-path: polygon(0 10%, 100% 10%, 100% 20%, 0 20%); }
+    60% { clip-path: polygon(0 1%, 100% 1%, 100% 2%, 0 2%); }
+    80% { clip-path: polygon(0 33%, 100% 33%, 100% 33%, 0 33%); }
+    100% { clip-path: polygon(0 44%, 100% 44%, 100% 44%, 0 44%); }
+}
+@keyframes glitch-anim-2 {
+    0% { clip-path: polygon(0 25%, 100% 25%, 100% 30%, 0 30%); }
+    20% { clip-path: polygon(0 3%, 100% 3%, 100% 3%, 0 3%); }
+    40% { clip-path: polygon(0 5%, 100% 5%, 100% 20%, 0 20%); }
+    60% { clip-path: polygon(0 15%, 100% 15%, 100% 20%, 0 20%); }
+    80% { clip-path: polygon(0 90%, 100% 90%, 100% 90%, 0 90%); }
+    100% { clip-path: polygon(0 50%, 100% 50%, 100% 50%, 0 50%); }
+}
+
+.global-glitch-active {
+    animation: global-shake 0.2s cubic-bezier(.36,.07,.19,.97) both infinite;
+    filter: sepia(100%) hue-rotate(300deg) saturate(300%) contrast(200%);
+}
+
+@keyframes global-shake {
+    10%, 90% { transform: translate3d(-1px, 0, 0); }
+    20%, 80% { transform: translate3d(2px, 0, 0); }
+    30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+    40%, 60% { transform: translate3d(4px, 0, 0); }
+}
+
+/* Scene 4: Ending */
+.final-message-container {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.heart {
+    font-size: 3rem;
+    color: var(--neon-red);
+    text-shadow: var(--neon-red-glow);
+    animation: heartbeat 2s infinite;
+    margin-bottom: 20px;
+}
+
+.final-text {
+    font-family: var(--font-emotional);
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+}
+
+.final-signature {
+    font-family: var(--font-header);
+    font-size: 1.2rem;
+    color: var(--neon-cyan);
+    margin-bottom: 50px;
+    letter-spacing: 2px;
+}
+
+.cyber-button.red-glow {
+    border-color: var(--neon-red);
+    color: var(--neon-red);
+    box-shadow: inset 0 0 10px rgba(255, 0, 60, 0.1), 0 0 10px rgba(255, 0, 60, 0.2);
+}
+
+.cyber-button.red-glow::before {
+    background: linear-gradient(90deg, transparent, rgba(255, 0, 60, 0.4), transparent);
+}
+
+.cyber-button.red-glow:hover {
+    box-shadow: inset 0 0 20px rgba(255, 0, 60, 0.3), 0 0 20px rgba(255, 0, 60, 0.6);
+    background: rgba(255, 0, 60, 0.05);
+}
+
+/* Scene 5: Connection Lost */
+.lost-text {
+    font-family: var(--font-terminal);
+    font-size: 1.5rem;
+    color: #666;
+    letter-spacing: 4px;
+}
